@@ -28,8 +28,8 @@ public:
 	unsigned long getCell(int, int);
 	unsigned long getCell(long pos);
 	void diffuse();
-	std::vector<long> getTorusNeighbours(int, int);
-	std::vector<long> getTorusNeighbours(long);
+	void getTorusNeighbours(unsigned long *, int, int);
+	//std::vector<long> getTorusNeighbours(long);
 	long getDiffSum(int, int);
 	long getDiffSum(long);
 	long long total();

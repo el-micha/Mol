@@ -44,8 +44,11 @@ void Sim::run()
 	running = true;
 
 	SDL_Event event;
+	int counter = 0;
 	while (running)
 	{
+		clock_t s0 = clock();
+		counter++;
 		//Handle events on queue
 		while (SDL_PollEvent(&event) != 0)
 		{
@@ -85,13 +88,18 @@ void Sim::run()
 		clock_t e1 = clock();
 		//std::cout << "Render Time: " << e1 - s1 << std::endl;
 
-		//SDL_Delay(0);
+		//SDL_Delay(1000);
 		clock_t start = clock();
 		//mol.diffuse();
-		mol.tick(0);
+		mol.tick(counter);
 		clock_t end = clock();
-		std::cout << "Diffuse Time: " << end - start << std::endl;
+		//std::cout << "Diffuse Time: " << end - start << std::endl;
 		mol.randomize(1, 1000, 10000);
+
+		clock_t e0 = clock();
+		std::cout << "Tick Time: " << e0 - s0 << std::endl;
+		//if (a > 1)
+		//	break;
 	}
 
 
