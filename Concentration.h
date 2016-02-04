@@ -13,8 +13,12 @@ private:
 	int gridHeight;
 	std::vector<unsigned long> *grid;
 	std::vector<unsigned long> *newGrid;
+	std::vector<unsigned long> *temp;
 	long linearPos(int, int);
 	void switchGrids();
+	double primaryWeight = 1;
+	double secondaryWeight = 1.0 / sqrt(2);
+	double diffusionCoefficient;
 public:
 	Concentration(int w, int h);
 	~Concentration();
@@ -30,6 +34,10 @@ public:
 	long getDiffSum(long);
 	long long total();
 	void print();
+	void randomize(int number, int minimum, int maximum);
+	void tick(int t);
+	void diffuseThreaded(int num);
+	void diffuseWorker(int start, int length);
 };
 
 #endif

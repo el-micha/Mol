@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cmath>
 #include <time.h>
+#include <thread>
 
 /*
 	Grid of cells holding number of molecules in each cell. 
@@ -9,10 +10,12 @@
 	y: row-number in [0,height-1]
 */
 
+
 Concentration::Concentration(int width, int height)
 {
 	gridWidth = width;
 	gridHeight = height;
+	diffusionCoefficient = 1.0 / 9.0;
 	grid = new std::vector<unsigned long>(gridHeight*gridWidth, 0);
 	newGrid = new std::vector<unsigned long>(gridHeight*gridWidth, 0);
 	std::cout << "size is " << grid->size() << std::endl;
@@ -25,7 +28,7 @@ Concentration::~Concentration()
 
 void Concentration::switchGrids()
 {
-	std::vector<unsigned long> * temp = grid;
+	temp = grid;
 	grid = newGrid;
 	newGrid = temp;
 }
@@ -55,8 +58,10 @@ long long Concentration::total()
 
 long Concentration::linearPos(int x, int y)
 {
-	x = (x + gridWidth) % gridWidth;
-	y = (y + gridHeight) % gridHeight;
+	if (x < 0 || x > gridWidth)
+		x = (x + gridWidth) % gridWidth;
+	if (y < 0 || y > gridHeight)
+		y = (y + gridHeight) % gridHeight;
 	return (y*gridWidth + x);
 }
 
@@ -85,16 +90,18 @@ unsigned long Concentration::getCell(long pos)
 
 std::vector<long> Concentration::getTorusNeighbours(int x, int y)
 {
-	std::vector<long> neighbours(0);
-	neighbours.push_back(linearPos(x-1, y));	//top
-	neighbours.push_back(linearPos(x, y+1));	//right
-	neighbours.push_back(linearPos(x+1, y));	//down
-	neighbours.push_back(linearPos(x, y-1));	//left
-	neighbours.push_back(linearPos(x-1, y+1));	//topright
-	neighbours.push_back(linearPos(x+1, y+1));	//downright
-	neighbours.push_back(linearPos(x+1, y-1));	//downleft
-	neighbours.push_back(linearPos(x-1, y-1));	//upleft
+	
+	std::vector<long> neighbours(8);
 
+	neighbours.at(1) = linearPos(x, y + 1);	//right
+	neighbours.at(3) = linearPos(x, y - 1);	//left
+	neighbours.at(0) = linearPos(x - 1, y);	//top
+	neighbours.at(4) = linearPos(x - 1, y + 1);	//topright
+	neighbours.at(7) = linearPos(x - 1, y - 1);	//topleft
+	neighbours.at(2) = linearPos(x + 1, y);	//down
+	neighbours.at(5) = linearPos(x + 1, y + 1);	//downright
+	neighbours.at(6) = linearPos(x + 1, y - 1);	//downleft
+	
 	return neighbours;
 }
 
@@ -114,10 +121,10 @@ long Concentration::getDiffSum(int x, int y)
 	double ownValue = getCell(x, y);
 	std::vector<long> neighbours = getTorusNeighbours(x, y);
 	double sum = 0;
-	double weight = 1.0;
-	double diffusionCoeff = 1.0 / 9.0;
+	double weightedDiff = 0;
 	for (int i = 0; i < neighbours.size(); i++)
 	{
+		weightedDiff = 0;
 		double diff = getCell(neighbours.at(i)) - ownValue;
 		//Don't diffuse if difference in concentration is too small
 		if (abs(diff) < 2)
@@ -125,23 +132,18 @@ long Concentration::getDiffSum(int x, int y)
 			continue;
 		}
 		
-		if (i > 3)
-			weight = 1 / sqrt(2);
-		/*
-		if (ownValue != 0)
-			std::cout << "ownvalue " << ownValue << std::endl;
-		if (getCell(neighbours.at(i)) != 0)
-			std::cout << "neighbour " << getCell(neighbours.at(i)) << std::endl;
-		*/
-		double weightedDiff = diffusionCoeff * weight * diff;
-		if (weightedDiff < 0)
+		if (i < 4)
 		{
-			weightedDiff = round(weightedDiff);
+			//Primary weight for orthogonal neighbours
+			weightedDiff = diffusionCoefficient * primaryWeight * diff;
 		}
 		else
 		{
-			weightedDiff = round(weightedDiff);
+			//Secondary weights for diagonal neighbours
+			weightedDiff = diffusionCoefficient * secondaryWeight * diff;
 		}
+		//Possibly case differentitation for negative/positive weightedDiffs?
+		weightedDiff = round(weightedDiff);
 		sum += weightedDiff;
 		/*
 		if (sum != 0)
@@ -155,6 +157,58 @@ long Concentration::getDiffSum(long pos)
 {
 	pos = (pos + (gridWidth*gridHeight)) % (gridWidth*gridHeight);
 	return getDiffSum(pos%gridWidth, (int)((double)pos / gridWidth));
+}
+
+void Concentration::tick(int t)
+{
+	//diffuse();
+	diffuseThreaded(4);
+}
+
+void Concentration::diffuseThreaded(int num)
+{
+	std::vector<std::thread> threadList(num);
+	for (int i = 0; i < num; i++)
+	{
+		int length = gridWidth*gridHeight / num;
+		threadList[i] = std::thread(&Concentration::diffuseWorker, this, i*length, length);
+	}
+
+	for (int i = 0; i < num; i++)
+	{
+		threadList[i].join();
+	}
+
+	switchGrids();
+}
+
+void Concentration::diffuseWorker(int start, int length)
+{
+	long diff;
+	long own;
+	for (long i = start; i < start + length - 1; i++)
+	{
+		//std::cout << "Cell NR " << i << std::endl;
+		diff = getDiffSum(i);
+		own = grid->at(i);
+		//Carefull not to create negative concentrations
+		if (diff < 0)
+		{
+			if (abs(diff) >= grid->at(i))
+			{
+				std::cout << "Error: Concentration cannot be smaller than 0." << std::endl;
+				std::cout << "Position " << i << std::endl;
+				newGrid->at(i) = 0;
+				continue;
+			}
+		}
+		//Overflow
+		//else
+		//{
+
+		//}
+		newGrid->at(i) = own + diff;
+	}
 }
 
 void Concentration::diffuse()
@@ -188,4 +242,16 @@ void Concentration::diffuse()
 	//std::cout << "Time: " << end - start << std::endl;
 }
 
-//Git test
+void Concentration::randomize(int number, int minimum, int maximum)
+{
+	if (minimum > maximum)
+	{
+		int a = minimum;
+		minimum = maximum;
+		maximum = a;
+	}
+	for (number; number > 0; number--)
+	{
+		setCell(minimum + rand() % (maximum - minimum), rand() % (gridWidth*gridHeight));
+	}
+}

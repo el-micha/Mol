@@ -33,8 +33,9 @@ Sim::~Sim()
 void Sim::run()
 {
 	Concentration mol = Concentration(GRID_WIDTH, GRID_HEIGHT);
-	mol.setCell(1000000, GRID_WIDTH*(GRID_HEIGHT+1) / 2);
-	
+	//mol.setCell(1000, GRID_WIDTH*(GRID_HEIGHT+1) / 2);
+	mol.randomize(100, 1000, 10000);
+
 	if (!initSDL())
 	{
 		std::cout << "Could not init Sim." << std::endl;
@@ -63,6 +64,8 @@ void Sim::run()
 		CELL_WIDTH = (int)((float)SCREEN_WIDTH / GRID_WIDTH);
 		CELL_HEIGHT = (int)((float)SCREEN_HEIGHT / GRID_HEIGHT);
 
+		clock_t s1 = clock();
+
 		for (long i = 0; i < GRID_WIDTH*GRID_HEIGHT; i++)
 		{
 			//x zeilennummer
@@ -78,11 +81,17 @@ void Sim::run()
 
 		//Update screen
 		SDL_RenderPresent(renderer);
+
+		clock_t e1 = clock();
+		//std::cout << "Render Time: " << e1 - s1 << std::endl;
+
 		//SDL_Delay(0);
 		clock_t start = clock();
-		mol.diffuse();
+		//mol.diffuse();
+		mol.tick(0);
 		clock_t end = clock();
-		std::cout << "Time: " << end - start << std::endl;
+		std::cout << "Diffuse Time: " << end - start << std::endl;
+		mol.randomize(1, 1000, 10000);
 	}
 
 
