@@ -15,9 +15,10 @@ Concentration::Concentration(int width, int height)
 {
 	gridWidth = width;
 	gridHeight = height;
+	LENGTH = width*height;
 	diffusionCoefficient = 1.0 / 9.0;
-	grid = new std::vector<unsigned long>(gridHeight*gridWidth, 0);
-	newGrid = new std::vector<unsigned long>(gridHeight*gridWidth, 0);
+	grid = new std::vector<unsigned long>(LENGTH, 0);
+	newGrid = new std::vector<unsigned long>(LENGTH, 0);
 	std::cout << "size is " << grid->size() << std::endl;
 }
 
@@ -66,7 +67,7 @@ long Concentration::linearPos(int x, int y)
 		y = y + gridHeight;
 	if (y >= gridHeight)
 		y = y % gridHeight;
-	if (y*gridWidth + x >= gridHeight*gridWidth)
+	if (y*gridWidth + x >= LENGTH)
 	{
 		std::cout << "Error accessing element " << x << " " << y << " " << y*gridWidth + x << std::endl;
 		return 0;
@@ -85,7 +86,7 @@ void Concentration::setCell(unsigned long value, int x, int y)
 }
 void Concentration::setCell(unsigned long value, long pos)
 {
-	grid->at((pos + gridWidth*gridHeight) % (gridWidth*gridHeight)) = value;
+	grid->at((pos + LENGTH) % (LENGTH)) = value;
 }
 
 unsigned long Concentration::getCell(int x, int y)
@@ -94,24 +95,24 @@ unsigned long Concentration::getCell(int x, int y)
 }
 unsigned long Concentration::getCell(long pos)
 {
-	return grid->at((pos + (gridWidth*gridHeight)) % (gridWidth*gridHeight));
+	return grid->at((pos + (LENGTH)) % (LENGTH));
 }
 
 void Concentration::getTorusNeighbours(unsigned long * neighbours, int x, int y)
 {
 	neighbours[0] = (*grid)[linearPos(x, y + 1)];	//right
-	neighbours[1] = (*grid)[linearPos(x, y - 1)];	//left
-	neighbours[2] = (*grid)[linearPos(x - 1, y)];	//top
-	neighbours[3] = (*grid)[linearPos(x - 1, y + 1)];	//topright
-	neighbours[4] = (*grid)[linearPos(x - 1, y - 1)];	//topleft
-	neighbours[5] = (*grid)[linearPos(x + 1, y)];	//down
-	neighbours[6] = (*grid)[linearPos(x + 1, y + 1)];	//downright
-	neighbours[7] = (*grid)[linearPos(x + 1, y - 1)];	//downleft
+	neighbours[1] = (*grid)[linearPos(x + 1, y)];	//down
+	neighbours[2] = (*grid)[linearPos(x, y - 1)];	//left
+	neighbours[3] = (*grid)[linearPos(x - 1, y)];	//top
+	neighbours[4] = (*grid)[linearPos(x - 1, y + 1)];	//topright
+	neighbours[5] = (*grid)[linearPos(x + 1, y + 1)];	//downright
+	neighbours[6] = (*grid)[linearPos(x + 1, y - 1)];	//downleft
+	neighbours[7] = (*grid)[linearPos(x - 1, y - 1)];	//topleft
 }
 /*
 std::vector<long> Concentration::getTorusNeighbours(long pos)
 {
-	pos = (pos + (gridWidth*gridHeight)) % (gridWidth*gridHeight);
+	pos = (pos + (LENGTH)) % (LENGTH);
 	return getTorusNeighbours(pos%gridWidth, (int)((double)pos / gridWidth));
 }
 */
@@ -163,7 +164,7 @@ long Concentration::getDiffSum(int x, int y)
 }
 long Concentration::getDiffSum(long pos)
 {
-	pos = (pos + (gridWidth*gridHeight)) % (gridWidth*gridHeight);
+	pos = (pos + (LENGTH)) % (LENGTH);
 	return getDiffSum(pos%gridWidth, (int)((double)pos / gridWidth));
 }
 
@@ -178,7 +179,7 @@ void Concentration::diffuseThreaded(int num)
 	std::vector<std::thread> threadList(num);
 	for (int i = 0; i < num; i++)
 	{
-		int length = gridWidth*gridHeight / num;
+		int length = LENGTH / num;
 		threadList[i] = std::thread(&Concentration::diffuseWorker, this, i*length, length);
 	}
 
@@ -261,6 +262,6 @@ void Concentration::randomize(int number, int minimum, int maximum)
 	}
 	for (number; number > 0; number--)
 	{
-		setCell(minimum + rand() % (maximum - minimum), rand() % (gridWidth*gridHeight));
+		setCell(minimum + rand() % (maximum - minimum), rand() % (LENGTH));
 	}
 }

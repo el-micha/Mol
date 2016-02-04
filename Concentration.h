@@ -11,6 +11,7 @@ private:
 	std::string moleculeName;
 	int gridWidth;
 	int gridHeight;
+	long LENGTH;
 	std::vector<unsigned long> *grid;
 	std::vector<unsigned long> *newGrid;
 	std::vector<unsigned long> *temp;

@@ -9,8 +9,8 @@ Sim::Sim(int gridWidth, int gridHeight)
 	GRID_WIDTH = gridWidth;
 	GRID_HEIGHT = gridHeight;
 
-	SCREEN_WIDTH = 1024;
-	SCREEN_HEIGHT = 512;
+	SCREEN_WIDTH = 1024 + 512;
+	SCREEN_HEIGHT = 512 + 256;
 
 	running = false;
 
@@ -33,8 +33,8 @@ Sim::~Sim()
 void Sim::run()
 {
 	Concentration mol = Concentration(GRID_WIDTH, GRID_HEIGHT);
-	//mol.setCell(1000, GRID_WIDTH*(GRID_HEIGHT+1) / 2);
-	mol.randomize(100, 1000, 10000);
+	mol.setCell(1000000, GRID_WIDTH*(GRID_HEIGHT+1) / 2);
+	//mol.randomize(100, 1000, 10000);
 
 	if (!initSDL())
 	{
@@ -88,18 +88,18 @@ void Sim::run()
 		clock_t e1 = clock();
 		//std::cout << "Render Time: " << e1 - s1 << std::endl;
 
-		//SDL_Delay(1000);
+		//SDL_Delay(120);
 		clock_t start = clock();
 		//mol.diffuse();
 		mol.tick(counter);
 		clock_t end = clock();
 		//std::cout << "Diffuse Time: " << end - start << std::endl;
-		mol.randomize(1, 1000, 10000);
+		//mol.randomize(1, 1000, 10000);
 
 		clock_t e0 = clock();
-		std::cout << "Tick Time: " << e0 - s0 << std::endl;
-		//if (a > 1)
-		//	break;
+		//std::cout << "Tick Time: " << e0 - s0 << std::endl;
+		if (counter%100 == 0)
+			std::cout << mol.total() << std::endl;
 	}
 
 
