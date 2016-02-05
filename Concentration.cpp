@@ -195,7 +195,7 @@ void Concentration::diffuseWorker(int start, int length)
 {
 	long diff;
 	long own;
-	for (long i = start; i < start + length - 1; i++)
+	for (long i = start; i < start + length; i++)
 	{
 		//std::cout << "Cell NR " << i << std::endl;
 		diff = getDiffSum(i);

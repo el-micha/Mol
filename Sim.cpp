@@ -33,7 +33,8 @@ Sim::~Sim()
 void Sim::run()
 {
 	Concentration mol = Concentration(GRID_WIDTH, GRID_HEIGHT);
-	mol.setCell(1000000, GRID_WIDTH*(GRID_HEIGHT+1) / 2);
+	long max = 1000000;
+	//mol.setCell(max, GRID_WIDTH*(GRID_HEIGHT+1) / 2);
 	//mol.randomize(100, 1000, 10000);
 
 	if (!initSDL())
@@ -57,6 +58,19 @@ void Sim::run()
 			{
 				running = false;
 			}
+			if (event.type == SDL_MOUSEBUTTONDOWN)
+			{
+				int x = event.button.x;
+				int y = event.button.y;
+
+				int cellwidth = SCREEN_WIDTH / GRID_WIDTH;
+				int cellheight = SCREEN_HEIGHT / GRID_HEIGHT;
+
+				x = x / CELL_WIDTH;
+				y = y / CELL_HEIGHT;
+
+				std::cout << mol.getCell(x,y) << std::endl;
+			}
 		}
 		//Simulate and draw here
 		
@@ -78,7 +92,7 @@ void Sim::run()
 			unsigned long a = mol.getCell(i);
 			
 			SDL_Rect rect = { y*CELL_WIDTH, x*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT };
-			SDL_SetRenderDrawColor(renderer, a % 256, 0 % 255, 0 % 255, 255);
+			SDL_SetRenderDrawColor(renderer, 0 % 256, 10*a % 256, 0 % 255, 255);
 			SDL_RenderFillRect(renderer, &rect);
 		}
 
@@ -88,13 +102,16 @@ void Sim::run()
 		clock_t e1 = clock();
 		//std::cout << "Render Time: " << e1 - s1 << std::endl;
 
-		//SDL_Delay(120);
+		SDL_Delay(100);
 		clock_t start = clock();
 		//mol.diffuse();
 		mol.tick(counter);
 		clock_t end = clock();
 		//std::cout << "Diffuse Time: " << end - start << std::endl;
-		//mol.randomize(1, 1000, 10000);
+		
+		//mol.randomize(1, 0, 255);
+		mol.setCell(25, (GRID_HEIGHT+0.8)*GRID_WIDTH/2);
+		//mol.setCell(255, (GRID_HEIGHT + 1.2)*GRID_WIDTH / 2);
 
 		clock_t e0 = clock();
 		//std::cout << "Tick Time: " << e0 - s0 << std::endl;
