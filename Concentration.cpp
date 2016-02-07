@@ -171,7 +171,7 @@ long Concentration::getDiffSum(long pos)
 void Concentration::tick(int t)
 {
 	//diffuse();
-	diffuseThreaded(1);
+	diffuseThreaded(4);
 }
 
 void Concentration::diffuseThreaded(int num)

@@ -102,14 +102,14 @@ void Sim::run()
 		clock_t e1 = clock();
 		//std::cout << "Render Time: " << e1 - s1 << std::endl;
 
-		SDL_Delay(100);
+		//SDL_Delay(100);
 		clock_t start = clock();
 		//mol.diffuse();
 		mol.tick(counter);
 		clock_t end = clock();
 		//std::cout << "Diffuse Time: " << end - start << std::endl;
 		
-		//mol.randomize(1, 0, 255);
+		mol.randomize(1, 0, 255);
 		mol.setCell(25, (GRID_HEIGHT+0.8)*GRID_WIDTH/2);
 		//mol.setCell(255, (GRID_HEIGHT + 1.2)*GRID_WIDTH / 2);
 
