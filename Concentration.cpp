@@ -24,7 +24,8 @@ Concentration::Concentration(int width, int height)
 
 Concentration::~Concentration()
 {
-
+	delete grid;
+	delete newGrid;
 }
 
 void Concentration::switchGrids()
@@ -59,6 +60,7 @@ long long Concentration::total()
 
 long Concentration::linearPos(int x, int y)
 {
+	
 	if (x < 0)
 		x = x + gridWidth;
 	if (x >= gridWidth)
@@ -67,6 +69,10 @@ long Concentration::linearPos(int x, int y)
 		y = y + gridHeight;
 	if (y >= gridHeight)
 		y = y % gridHeight;
+		
+	//x = (x + gridWidth) % gridWidth;
+	//y = (y + gridHeight) % gridHeight;
+
 	if (y*gridWidth + x >= LENGTH)
 	{
 		std::cout << "Error accessing element " << x << " " << y << " " << y*gridWidth + x << std::endl;
@@ -136,7 +142,8 @@ long Concentration::getDiffSum(int x, int y)
 		weightedDiff = 0;
 		double diff = neighbours[i] - ownValue;
 		//Don't diffuse if difference in concentration is too small
-		if (abs(diff) < 2)
+		if ((diff > 0 && diff < 2) || (diff < 0 && diff > -2))
+		//if (abs(diff) < 2)
 		{
 			continue;
 		}
@@ -171,7 +178,7 @@ long Concentration::getDiffSum(long pos)
 void Concentration::tick(int t)
 {
 	//diffuse();
-	diffuseThreaded(4);
+	diffuseThreaded(1);
 }
 
 void Concentration::diffuseThreaded(int num)
