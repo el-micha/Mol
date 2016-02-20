@@ -29,16 +29,15 @@ public:
 	unsigned long getCell(int, int);
 	unsigned long getCell(long pos);
 	void diffuse();
-	void getTorusNeighbours(unsigned long *, int, int);
+	void getTorusNeighbours(unsigned long *, long);
 	//std::vector<long> getTorusNeighbours(long);
-	long getDiffSum(int, int);
 	long getDiffSum(long);
 	long long total();
 	void print();
 	void randomize(int number, int minimum, int maximum);
 	void tick(int t);
 	void diffuseThreaded(int num);
-	void diffuseWorker(int start, int length);
+	void diffuseWorker(int start, long length);
 };
 
 #endif

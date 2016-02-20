@@ -120,8 +120,8 @@ void Sim::run()
 
 		clock_t e0 = clock();
 		std::cout << "Tick Time: " << e0 - s0 << std::endl;
-		//if (counter%100 == 0)
-		//	std::cout << mol.total() << std::endl;
+		if (counter%100 == 0)
+			std::cout << mol.total() << std::endl;
 	}
 
 

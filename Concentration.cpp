@@ -104,16 +104,18 @@ unsigned long Concentration::getCell(long pos)
 	return grid->at((pos + (LENGTH)) % (LENGTH));
 }
 
-void Concentration::getTorusNeighbours(unsigned long * neighbours, int x, int y)
+void Concentration::getTorusNeighbours(unsigned long * neighbours, long pos)
 {
-	neighbours[0] = (*grid)[linearPos(x, y + 1)];	//right
-	neighbours[1] = (*grid)[linearPos(x + 1, y)];	//down
-	neighbours[2] = (*grid)[linearPos(x, y - 1)];	//left
-	neighbours[3] = (*grid)[linearPos(x - 1, y)];	//top
-	neighbours[4] = (*grid)[linearPos(x - 1, y + 1)];	//topright
-	neighbours[5] = (*grid)[linearPos(x + 1, y + 1)];	//downright
-	neighbours[6] = (*grid)[linearPos(x + 1, y - 1)];	//downleft
-	neighbours[7] = (*grid)[linearPos(x - 1, y - 1)];	//topleft
+	//edge cases with ifs or with modulos: what's more efficient?
+
+	neighbours[0] = (*grid)[((pos + 1) + LENGTH) % LENGTH];	//right
+	neighbours[1] = (*grid)[((pos - 1) + LENGTH) % LENGTH];	//left
+	neighbours[2] = (*grid)[((pos + gridWidth) + LENGTH) % LENGTH];	//down
+	neighbours[3] = (*grid)[((pos + gridWidth + 1) + LENGTH) % LENGTH];	//downright
+	neighbours[4] = (*grid)[((pos + gridWidth - 1) + LENGTH) % LENGTH];	//downleft
+	neighbours[5] = (*grid)[((pos - gridWidth) + LENGTH) % LENGTH];	//top
+	neighbours[6] = (*grid)[((pos - gridWidth + 1) + LENGTH) % LENGTH];	//topright
+	neighbours[7] = (*grid)[((pos - gridWidth - 1) + LENGTH) % LENGTH];	//topleft
 }
 /*
 std::vector<long> Concentration::getTorusNeighbours(long pos)
@@ -122,7 +124,7 @@ std::vector<long> Concentration::getTorusNeighbours(long pos)
 	return getTorusNeighbours(pos%gridWidth, (int)((double)pos / gridWidth));
 }
 */
-long Concentration::getDiffSum(int x, int y)
+long Concentration::getDiffSum(long pos)
 {
 	//optimize by circumventing the getTorusNeighbours call and instead summing directly
 	/*
@@ -130,20 +132,30 @@ long Concentration::getDiffSum(int x, int y)
 		Diagonal neighbours (last 4 in list) have weight 1/sqrt(2)
 	*/
 	//TODO: optimize this next call
-	double ownValue = getCell(x, y);
+	double ownValue = getCell(pos);
 
 	unsigned long neighbours[8];
-	getTorusNeighbours(neighbours, x, y);
+	getTorusNeighbours(neighbours, pos);
 
 	double sum = 0;
-	double weightedDiff = 0;
+	
+	sum += (neighbours[0] - ownValue) * diffusionCoefficient * primaryWeight;
+	sum += (neighbours[1] - ownValue) * diffusionCoefficient * primaryWeight;
+	sum += (neighbours[2] - ownValue) * diffusionCoefficient * primaryWeight;
+	sum += (neighbours[3] - ownValue) * diffusionCoefficient * primaryWeight;
+	sum += (neighbours[4] - ownValue) * diffusionCoefficient * secondaryWeight;
+	sum += (neighbours[5] - ownValue) * diffusionCoefficient * secondaryWeight;
+	sum += (neighbours[6] - ownValue) * diffusionCoefficient * secondaryWeight;
+	sum += (neighbours[7] - ownValue) * diffusionCoefficient * secondaryWeight;
+
+	/*
 	for (int i = 0; i < 8; i++)
 	{
 		weightedDiff = 0;
 		double diff = neighbours[i] - ownValue;
 		//Don't diffuse if difference in concentration is too small
-		if ((diff > 0 && diff < 2) || (diff < 0 && diff > -2))
 		//if (abs(diff) < 2)
+		if ((diff > 0 && diff < 2) || (diff < 0 && diff > -2))
 		{
 			continue;
 		}
@@ -161,20 +173,22 @@ long Concentration::getDiffSum(int x, int y)
 		//Possibly case differentitation for negative/positive weightedDiffs?
 		weightedDiff = round(weightedDiff);
 		sum += weightedDiff;
-		/*
-		if (sum != 0)
-			std::cout << "sum " << sum << std::endl;
-		*/
+		
+		//if (sum != 0)
+		//	std::cout << "sum " << sum << std::endl;
+		
 	}
+	*/
 	//std::cout << "total sum " << sum << std::endl;
 	return (long)sum;
 }
+/*
 long Concentration::getDiffSum(long pos)
 {
 	pos = (pos + (LENGTH)) % (LENGTH);
 	return getDiffSum(pos%gridWidth, (int)((double)pos / gridWidth));
 }
-
+*/
 void Concentration::tick(int t)
 {
 	//diffuse();
@@ -198,7 +212,7 @@ void Concentration::diffuseThreaded(int num)
 	switchGrids();
 }
 
-void Concentration::diffuseWorker(int start, int length)
+void Concentration::diffuseWorker(int start, long length)
 {
 	long diff;
 	long own;

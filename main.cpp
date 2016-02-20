@@ -8,7 +8,7 @@
 
 int main(int argc, char* argv[])
 {
-	Sim simulation = Sim(256, 128);
+	Sim simulation = Sim(512, 256);
 
 	simulation.run();
 
