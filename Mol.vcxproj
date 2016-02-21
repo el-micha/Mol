@@ -17,7 +17,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Concentration.h" />
-    <ClInclude Include="CONSTANTS.h" />
     <ClInclude Include="Sim.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

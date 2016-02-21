@@ -134,14 +134,14 @@ long Concentration::getDiffSum(long pos)
 	unsigned long neighbours[8];
 	getTorusNeighbours(neighbours, pos);
 
-	double sum = 0;
+	double sum = 10/(1+rand()%100);
 	
 	sum += (neighbours[0] - ownValue) * diffusionCoefficient * primaryWeight;
 	sum += (neighbours[1] - ownValue) * diffusionCoefficient * primaryWeight;
 	sum += (neighbours[2] - ownValue) * diffusionCoefficient * primaryWeight;
-	sum += (neighbours[3] - ownValue) * diffusionCoefficient * primaryWeight;
+	sum += (neighbours[3] - ownValue) * diffusionCoefficient * secondaryWeight;
 	sum += (neighbours[4] - ownValue) * diffusionCoefficient * secondaryWeight;
-	sum += (neighbours[5] - ownValue) * diffusionCoefficient * secondaryWeight;
+	sum += (neighbours[5] - ownValue) * diffusionCoefficient * primaryWeight;
 	sum += (neighbours[6] - ownValue) * diffusionCoefficient * secondaryWeight;
 	sum += (neighbours[7] - ownValue) * diffusionCoefficient * secondaryWeight;
 
@@ -170,14 +170,15 @@ void Concentration::diffuseThreaded(int num)
 	switchGrids();
 }
 
-void Concentration::diffuseWorker(int start, long gridLength)
+void Concentration::diffuseWorker(int start, long len)
 {
 	long diff;
 	long own;
-	for (long i = start; i < start + gridLength; i++)
+	//long *bufferGrid = new long[len];
+	for (long i = start; i < start + len; i++)
 	{
-		diff = getDiffSum(i);
 		own = (*grid)[i];
+		diff = getDiffSum(i);
 		//Carefull not to create negative concentrations
 		if (diff < 0)
 		{
@@ -185,6 +186,7 @@ void Concentration::diffuseWorker(int start, long gridLength)
 			{
 				std::cout << "Error: Concentration cannot be smaller than 0." << std::endl;
 				std::cout << "Position " << i << std::endl;
+				//bufferGrid[i-start] = 0;
 				(*newGrid)[i] = 0;
 				continue;
 			}
@@ -195,8 +197,15 @@ void Concentration::diffuseWorker(int start, long gridLength)
 
 		//}
 		
+		//bufferGrid[i-start] = own + diff;
 		(*newGrid)[i] = own + diff;
 	}
+	/*
+	for (long i = start; i < start + len; i++)
+	{
+		(*newGrid)[i] = bufferGrid[i-start];
+	}
+	*/
 }
 
 void Concentration::diffuse()
