@@ -8,6 +8,7 @@ Sim::Sim(int gridWidth, int gridHeight)
 {
 	GRID_WIDTH = gridWidth;
 	GRID_HEIGHT = gridHeight;
+	GRID_LENGTH = gridWidth * gridHeight;
 
 	SCREEN_WIDTH = 1024 + 512;
 	SCREEN_HEIGHT = 512 + 256;

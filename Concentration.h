@@ -11,10 +11,12 @@ private:
 	std::string moleculeName;
 	int gridWidth;
 	int gridHeight;
-	long LENGTH;
-	std::vector<unsigned long> *grid;
-	std::vector<unsigned long> *newGrid;
-	std::vector<unsigned long> *temp;
+	long gridLength;
+	unsigned long *g;
+	unsigned long *ng;
+	unsigned long **grid;
+	unsigned long **newGrid;
+	unsigned long **temp;
 	long linearPos(int, int);
 	void switchGrids();
 	double primaryWeight = 1;

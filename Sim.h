@@ -10,6 +10,7 @@ private:
 	//Simulation Resolution:
 	int GRID_WIDTH;
 	int GRID_HEIGHT;
+	long GRID_LENGTH;
 	//Draw Resolution:
 	int SCREEN_WIDTH;
 	int SCREEN_HEIGHT;
@@ -20,7 +21,7 @@ private:
 	SDL_Renderer * renderer = NULL;
 	
 public:
-	Sim(int gridWidth, int gridHeight);
+	Sim(int, int);
 	~Sim();
 	void run();
 	bool running;
