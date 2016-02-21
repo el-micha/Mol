@@ -30,7 +30,6 @@ public:
 	unsigned long getCell(long pos);
 	void diffuse();
 	void getTorusNeighbours(unsigned long *, long);
-	//std::vector<long> getTorusNeighbours(long);
 	long getDiffSum(long);
 	long long total();
 	void print();

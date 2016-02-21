@@ -42,7 +42,7 @@ void Concentration::print()
 	{
 		if (i%gridWidth == 0)
 			std::cout << std::endl;
-		std::cout << grid->at(i) << ", ";
+		std::cout << (*grid)[i] << ", ";
 	}
 	std::cout << std::endl;
 	std::cout << "Total : " << total() << std::endl<<std::endl;
@@ -53,7 +53,7 @@ long long Concentration::total()
 	long long sum = 0;
 	for (long i = 0; i < grid->size(); i++)
 	{
-		sum += grid->at(i);
+		sum += (*grid)[i];
 	}
 	return sum;
 }
@@ -92,7 +92,7 @@ void Concentration::setCell(unsigned long value, int x, int y)
 }
 void Concentration::setCell(unsigned long value, long pos)
 {
-	grid->at((pos + LENGTH) % (LENGTH)) = value;
+	(*grid)[(pos + LENGTH) % (LENGTH)] = value;
 }
 
 unsigned long Concentration::getCell(int x, int y)
@@ -101,7 +101,7 @@ unsigned long Concentration::getCell(int x, int y)
 }
 unsigned long Concentration::getCell(long pos)
 {
-	return grid->at((pos + (LENGTH)) % (LENGTH));
+	return (*grid)[(pos + (LENGTH)) % (LENGTH)];
 }
 
 void Concentration::getTorusNeighbours(unsigned long * neighbours, long pos)
@@ -117,21 +117,9 @@ void Concentration::getTorusNeighbours(unsigned long * neighbours, long pos)
 	neighbours[6] = (*grid)[((pos - gridWidth + 1) + LENGTH) % LENGTH];	//topright
 	neighbours[7] = (*grid)[((pos - gridWidth - 1) + LENGTH) % LENGTH];	//topleft
 }
-/*
-std::vector<long> Concentration::getTorusNeighbours(long pos)
-{
-	pos = (pos + (LENGTH)) % (LENGTH);
-	return getTorusNeighbours(pos%gridWidth, (int)((double)pos / gridWidth));
-}
-*/
+
 long Concentration::getDiffSum(long pos)
 {
-	//optimize by circumventing the getTorusNeighbours call and instead summing directly
-	/*
-		Direct neighbours (first 4 in list) have weight 1
-		Diagonal neighbours (last 4 in list) have weight 1/sqrt(2)
-	*/
-	//TODO: optimize this next call
 	double ownValue = getCell(pos);
 
 	unsigned long neighbours[8];
@@ -148,50 +136,11 @@ long Concentration::getDiffSum(long pos)
 	sum += (neighbours[6] - ownValue) * diffusionCoefficient * secondaryWeight;
 	sum += (neighbours[7] - ownValue) * diffusionCoefficient * secondaryWeight;
 
-	/*
-	for (int i = 0; i < 8; i++)
-	{
-		weightedDiff = 0;
-		double diff = neighbours[i] - ownValue;
-		//Don't diffuse if difference in concentration is too small
-		//if (abs(diff) < 2)
-		if ((diff > 0 && diff < 2) || (diff < 0 && diff > -2))
-		{
-			continue;
-		}
-		
-		if (i < 4)
-		{
-			//Primary weight for orthogonal neighbours
-			weightedDiff = diffusionCoefficient * primaryWeight * diff;
-		}
-		else
-		{
-			//Secondary weights for diagonal neighbours
-			weightedDiff = diffusionCoefficient * secondaryWeight * diff;
-		}
-		//Possibly case differentitation for negative/positive weightedDiffs?
-		weightedDiff = round(weightedDiff);
-		sum += weightedDiff;
-		
-		//if (sum != 0)
-		//	std::cout << "sum " << sum << std::endl;
-		
-	}
-	*/
-	//std::cout << "total sum " << sum << std::endl;
 	return (long)sum;
 }
-/*
-long Concentration::getDiffSum(long pos)
-{
-	pos = (pos + (LENGTH)) % (LENGTH);
-	return getDiffSum(pos%gridWidth, (int)((double)pos / gridWidth));
-}
-*/
+
 void Concentration::tick(int t)
 {
-	//diffuse();
 	diffuseThreaded(1);
 }
 
@@ -218,17 +167,16 @@ void Concentration::diffuseWorker(int start, long length)
 	long own;
 	for (long i = start; i < start + length; i++)
 	{
-		//std::cout << "Cell NR " << i << std::endl;
 		diff = getDiffSum(i);
-		own = grid->at(i);
+		own = (*grid)[i];
 		//Carefull not to create negative concentrations
 		if (diff < 0)
 		{
-			if (abs(diff) >= grid->at(i))
+			if (abs(diff) >= (*grid)[i])
 			{
 				std::cout << "Error: Concentration cannot be smaller than 0." << std::endl;
 				std::cout << "Position " << i << std::endl;
-				newGrid->at(i) = 0;
+				(*newGrid)[i] = 0;
 				continue;
 			}
 		}
@@ -238,7 +186,7 @@ void Concentration::diffuseWorker(int start, long length)
 
 		//}
 		
-		newGrid->at(i) = own + diff;
+		(*newGrid)[i] = own + diff;
 	}
 }
 
@@ -253,11 +201,11 @@ void Concentration::diffuse()
 		//Carefull not to create negative concentrations
 		if (diff < 0)
 		{
-			if (abs(diff) >= grid->at(i))
+			if (abs(diff) >= (*grid)[i])
 			{
 				std::cout << "Error: Concentration cannot be smaller than 0." << std::endl;
 				std::cout << "Position " << i << std::endl;
-				newGrid->at(i) = 0;
+				(*newGrid)[i] = 0;
 				continue;
 			}
 		}
@@ -266,7 +214,7 @@ void Concentration::diffuse()
 		{
 			
 		}
-		newGrid->at(i) = grid->at(i) + diff;
+		(*newGrid)[i] = (*grid)[i] + diff;
 	}
 	switchGrids();
 	//clock_t end = clock();
@@ -283,6 +231,6 @@ void Concentration::randomize(int number, int minimum, int maximum)
 	}
 	for (number; number > 0; number--)
 	{
-		setCell(minimum + rand() % (maximum - minimum), rand() % (LENGTH));
+		setCell(minimum + rand() % (maximum - minimum), (long)((LENGTH / 32768) * rand() + rand()) % (LENGTH));
 	}
 }
