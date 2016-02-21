@@ -17,10 +17,8 @@ Concentration::Concentration(int width, int height)
 	gridHeight = height;
 	gridLength = width*height;
 	diffusionCoefficient = 1.0 / 9.0;
-	//grid = new std::vector<unsigned long>(gridLength, 0);
-	//newGrid = new std::vector<unsigned long>(gridLength, 0);
-	g = new unsigned long[gridLength];
-	ng = new unsigned long[gridLength];
+	g = new long[gridLength];
+	ng = new long[gridLength];
 	for (long i = 0; i < gridLength; i++)
 	{
 		g[i] = 0;
@@ -39,9 +37,17 @@ Concentration::~Concentration()
 
 void Concentration::switchGrids()
 {
+	/*
 	temp = grid;
 	grid = newGrid;
 	newGrid = temp;
+	*/
+	clock_t s = clock();
+	for (long i = 0; i < gridLength; i++)
+	{
+		(*grid)[i] = (*newGrid)[i];
+	}
+	//std::cout << "copy time " << s - clock() << std::endl;
 }
 
 void Concentration::print()
@@ -54,7 +60,15 @@ void Concentration::print()
 		std::cout << (*grid)[i] << ", ";
 	}
 	std::cout << std::endl;
-	std::cout << "Total : " << total() << std::endl<<std::endl;
+	std::cout << "New";
+	for (long i = 0; i < gridLength; i++)
+	{
+		if (i%gridWidth == 0)
+			std::cout << std::endl;
+		std::cout << (*newGrid)[i] << ", ";
+	}
+	std::cout << std::endl;
+	//std::cout << "Total : " << total() << std::endl<<std::endl;
 }
 
 long long Concentration::total()
@@ -95,25 +109,26 @@ std::string Concentration::getName()
 	return "some molecule";
 }
 
-void Concentration::setCell(unsigned long value, int x, int y)
+void Concentration::setCell(long value, int x, int y)
 {
 	setCell(value, linearPos(x, y));
 }
-void Concentration::setCell(unsigned long value, long pos)
+void Concentration::setCell(long value, long pos)
 {
 	(*grid)[(pos + gridLength) % (gridLength)] = value;
+	(*newGrid)[(pos + gridLength) % (gridLength)] = value;
 }
 
-unsigned long Concentration::getCell(int x, int y)
+long Concentration::getCell(int x, int y)
 {
 	return getCell(linearPos(x, y));
 }
-unsigned long Concentration::getCell(long pos)
+long Concentration::getCell(long pos)
 {
 	return (*grid)[(pos + (gridLength)) % (gridLength)];
 }
-
-void Concentration::getTorusNeighbours(unsigned long * neighbours, long pos)
+/*
+void Concentration::getTorusNeighbours(long * neighbours, long pos)
 {
 	//edge cases with ifs or with modulos: what's more efficient?
 
@@ -126,27 +141,135 @@ void Concentration::getTorusNeighbours(unsigned long * neighbours, long pos)
 	neighbours[6] = (*grid)[((pos - gridWidth + 1) + gridLength) % gridLength];	//topright
 	neighbours[7] = (*grid)[((pos - gridWidth - 1) + gridLength) % gridLength];	//topleft
 }
-
+*/
 long Concentration::getDiffSum(long pos)
 {
 	double ownValue = getCell(pos);
 
-	unsigned long neighbours[8];
-	getTorusNeighbours(neighbours, pos);
+	long neighbours[8];
+	//getTorusNeighbours(neighbours, pos);
+	neighbours[0] = (*grid)[((pos + 1) + gridLength) % gridLength];	//right
+	neighbours[1] = (*grid)[((pos - 1) + gridLength) % gridLength];	//left
+	neighbours[2] = (*grid)[((pos + gridWidth) + gridLength) % gridLength];	//down
+	neighbours[3] = (*grid)[((pos + gridWidth + 1) + gridLength) % gridLength];	//downright
+	neighbours[4] = (*grid)[((pos + gridWidth - 1) + gridLength) % gridLength];	//downleft
+	neighbours[5] = (*grid)[((pos - gridWidth) + gridLength) % gridLength];	//top
+	neighbours[6] = (*grid)[((pos - gridWidth + 1) + gridLength) % gridLength];	//topright
+	neighbours[7] = (*grid)[((pos - gridWidth - 1) + gridLength) % gridLength];	//topleft
 
-	double sum = 10/(1+rand()%100);
+	double sum = 0;
 	
-	sum += (neighbours[0] - ownValue) * diffusionCoefficient * primaryWeight;
-	sum += (neighbours[1] - ownValue) * diffusionCoefficient * primaryWeight;
-	sum += (neighbours[2] - ownValue) * diffusionCoefficient * primaryWeight;
-	sum += (neighbours[3] - ownValue) * diffusionCoefficient * secondaryWeight;
-	sum += (neighbours[4] - ownValue) * diffusionCoefficient * secondaryWeight;
-	sum += (neighbours[5] - ownValue) * diffusionCoefficient * primaryWeight;
-	sum += (neighbours[6] - ownValue) * diffusionCoefficient * secondaryWeight;
-	sum += (neighbours[7] - ownValue) * diffusionCoefficient * secondaryWeight;
+	sum += (neighbours[0] - ownValue) * diffusionCoefficient * primaryWeight; 
+	sum += (neighbours[1] - ownValue) * diffusionCoefficient * primaryWeight; 
+	sum += (neighbours[2] - ownValue) * diffusionCoefficient * primaryWeight; 
+	sum += (neighbours[3] - ownValue) * diffusionCoefficient * secondaryWeight; //
+	sum += (neighbours[4] - ownValue) * diffusionCoefficient * secondaryWeight; //
+	sum += (neighbours[5] - ownValue) * diffusionCoefficient * primaryWeight; 
+	sum += (neighbours[6] - ownValue) * diffusionCoefficient * secondaryWeight; //
+	sum += (neighbours[7] - ownValue) * diffusionCoefficient * secondaryWeight; //
 
+	
 	return (long)sum;
 }
+
+void Concentration::diffuseWorker(int start, long len)
+{
+	long own;
+	long diffSum;
+	
+	long topRight;
+	long right;
+	long downRight;
+	long down;
+
+	long diffTopright;
+	long diffRight;
+	long diffDownright;
+	long diffDown;
+
+	int dir = 0;
+	int repetitions = 2;
+
+	for (long i = start; i < start + len; i++)
+	{
+		own = (*grid)[i];
+
+		topRight = (*grid)[((i - gridWidth + 1) + gridLength) % gridLength];
+		right =  (*grid)[((i + 1) + gridLength) % gridLength];
+		downRight = (*grid)[((i + gridWidth + 1) + gridLength) % gridLength];
+		down = (*grid)[((i + gridWidth) + gridLength) % gridLength];
+
+		diffTopright = diffusionCoefficient * (1 / sqrt(2)) * (topRight - own);
+		diffRight = diffusionCoefficient * (right - own);
+		diffDownright = diffusionCoefficient * (1 / sqrt(2)) * (downRight - own);
+		diffDown = diffusionCoefficient * (down - own);
+
+
+		diffSum = diffTopright + diffRight + diffDownright + diffDown;
+
+		//std::cout << "own " << own << " topright " << diffTopright << " right " << diffRight << " downRight " << diffDownright << " down " << diffDown << std::endl;
+		//std::cout << "Nown " << (*newGrid)[i] << " Ntopright " << (*newGrid)[((i - gridWidth + 1) + gridLength) % gridLength] << " Nright " << (*newGrid)[((i + 1) + gridLength) % gridLength] << " NdownRight " << (*newGrid)[((i + gridWidth + 1) + gridLength) % gridLength] << " Ndown " << (*newGrid)[((i + gridWidth) + gridLength) % gridLength] << std::endl<<std::endl;
+
+		(*newGrid)[i] += diffSum;
+
+		(*newGrid)[((i - gridWidth + 1) + gridLength) % gridLength] -= diffTopright;
+		(*newGrid)[((i + 1) + gridLength) % gridLength] -= diffRight;
+		(*newGrid)[((i + gridWidth + 1) + gridLength) % gridLength] -= diffDownright;
+		(*newGrid)[((i + gridWidth) + gridLength) % gridLength] -= diffDown;
+
+
+		//if new content greater than 0, randomly diffuse rep times
+		
+		for (int r = 0; r < repetitions; r++)
+		{
+			int diff = rand() % 2;
+			if (diff == 0)
+				diff = -1;
+			if ((*newGrid)[i] - diff >= 0)
+			{
+				dir = rand() % 4;
+				if (dir == 0)
+				{
+					if ((*newGrid)[((i - gridWidth + 1) + gridLength) % gridLength] + diff >= 0)
+					{
+						(*newGrid)[i] -= diff;
+						(*newGrid)[((i - gridWidth + 1) + gridLength) % gridLength] += diff;
+					}
+				}
+				else if (dir == 1)
+				{
+					if ((*newGrid)[((i + 1) + gridLength) % gridLength] + diff >= 0)
+					{
+						(*newGrid)[i] -= diff;
+						(*newGrid)[((i + 1) + gridLength) % gridLength] += diff;
+					}
+				}
+				else if (dir == 2)
+				{
+					if ((*newGrid)[((i + gridWidth + 1) + gridLength) % gridLength] + diff >= 0)
+					{
+						(*newGrid)[i] -= diff;
+						(*newGrid)[((i + gridWidth + 1) + gridLength) % gridLength] += diff;
+					}
+				}
+				else if (dir == 3)
+				{
+					if ((*newGrid)[((i + gridWidth) + gridLength) % gridLength] + diff >= 0)
+					{
+						(*newGrid)[i] -= diff;
+						(*newGrid)[((i + gridWidth) + gridLength) % gridLength] += diff;
+					}
+				}
+			}
+		}
+		
+
+		//print();
+
+		//TODO: Handle Overflow
+	}
+}
+
 
 void Concentration::tick(int t)
 {
@@ -168,44 +291,6 @@ void Concentration::diffuseThreaded(int num)
 	}
 
 	switchGrids();
-}
-
-void Concentration::diffuseWorker(int start, long len)
-{
-	long diff;
-	long own;
-	//long *bufferGrid = new long[len];
-	for (long i = start; i < start + len; i++)
-	{
-		own = (*grid)[i];
-		diff = getDiffSum(i);
-		//Carefull not to create negative concentrations
-		if (diff < 0)
-		{
-			if (abs(diff) >= (*grid)[i])
-			{
-				std::cout << "Error: Concentration cannot be smaller than 0." << std::endl;
-				std::cout << "Position " << i << std::endl;
-				//bufferGrid[i-start] = 0;
-				(*newGrid)[i] = 0;
-				continue;
-			}
-		}
-		//Overflow
-		//else
-		//{
-
-		//}
-		
-		//bufferGrid[i-start] = own + diff;
-		(*newGrid)[i] = own + diff;
-	}
-	/*
-	for (long i = start; i < start + len; i++)
-	{
-		(*newGrid)[i] = bufferGrid[i-start];
-	}
-	*/
 }
 
 void Concentration::diffuse()
