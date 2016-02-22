@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <random>
 
 
 class Concentration
@@ -22,6 +23,10 @@ private:
 	double primaryWeight = 1;
 	double secondaryWeight = 1.0 / sqrt(2);
 	double diffusionCoefficient;
+	double secWeight;
+
+	std::default_random_engine gen;
+	std::normal_distribution<double> distro;
 public:
 	Concentration(int w, int h);
 	~Concentration();

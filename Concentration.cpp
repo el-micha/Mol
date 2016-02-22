@@ -3,6 +3,7 @@
 #include <cmath>
 #include <time.h>
 #include <thread>
+#include <random>
 
 /*
 	Grid of cells holding number of molecules in each cell. 
@@ -17,6 +18,7 @@ Concentration::Concentration(int width, int height)
 	gridHeight = height;
 	gridLength = width*height;
 	diffusionCoefficient = 1.0 / 9.0;
+	secWeight = 1 / sqrt(2);
 	g = new long[gridLength];
 	ng = new long[gridLength];
 	for (long i = 0; i < gridLength; i++)
@@ -27,6 +29,9 @@ Concentration::Concentration(int width, int height)
 	grid = &g;
 	newGrid = &ng;
 	std::cout << "size is " << gridLength << std::endl;
+
+	gen = std::default_random_engine();
+	distro = std::normal_distribution<double>(0,1);
 }
 
 Concentration::~Concentration()
@@ -188,7 +193,10 @@ void Concentration::diffuseWorker(int start, long len)
 	long diffDown;
 
 	int dir = 0;
-	int repetitions = 2;
+	int repetitions = 0;
+
+	//std::default_random_engine gen;
+	//std::normal_distribution<double> distro(0, 1);
 
 	for (long i = start; i < start + len; i++)
 	{
@@ -199,9 +207,9 @@ void Concentration::diffuseWorker(int start, long len)
 		downRight = (*grid)[((i + gridWidth + 1) + gridLength) % gridLength];
 		down = (*grid)[((i + gridWidth) + gridLength) % gridLength];
 
-		diffTopright = diffusionCoefficient * (1 / sqrt(2)) * (topRight - own);
+		diffTopright = diffusionCoefficient * secWeight * (topRight - own);
 		diffRight = diffusionCoefficient * (right - own);
-		diffDownright = diffusionCoefficient * (1 / sqrt(2)) * (downRight - own);
+		diffDownright = diffusionCoefficient * secWeight * (downRight - own);
 		diffDown = diffusionCoefficient * (down - own);
 
 
@@ -222,12 +230,18 @@ void Concentration::diffuseWorker(int start, long len)
 		
 		for (int r = 0; r < repetitions; r++)
 		{
-			int diff = rand() % 2;
-			if (diff == 0)
+			//fast but bad random:
+			int diff = rand();
+			if (diff < RAND_MAX / 2)
 				diff = -1;
+			else
+				diff = 1;
+
+			//slow but good random:
+			//int diff = round(distro(gen));
 			if ((*newGrid)[i] - diff >= 0)
 			{
-				dir = rand() % 4;
+				dir = ((int)(rand()/7)) % 4;
 				if (dir == 0)
 				{
 					if ((*newGrid)[((i - gridWidth + 1) + gridLength) % gridLength] + diff >= 0)
@@ -273,7 +287,7 @@ void Concentration::diffuseWorker(int start, long len)
 
 void Concentration::tick(int t)
 {
-	diffuseThreaded(1);
+	diffuseThreaded(4);
 }
 
 void Concentration::diffuseThreaded(int num)
