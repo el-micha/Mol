@@ -193,7 +193,7 @@ void Concentration::diffuseWorker(int start, long len)
 	long diffDown;
 
 	int dir = 0;
-	int repetitions = 0;
+	int repetitions = 1;
 
 	//std::default_random_engine gen;
 	//std::normal_distribution<double> distro(0, 1);
