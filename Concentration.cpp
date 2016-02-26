@@ -31,8 +31,8 @@ Concentration::Concentration(int width, int height)
 	std::cout << "size is " << gridLength << std::endl;
 
 	gen = std::default_random_engine();
-	distro = std::normal_distribution<double>(0,1);
-}
+	distro = std::normal_distribution<double>(1,1);
+};
 
 Concentration::~Concentration()
 {
@@ -195,6 +195,9 @@ void Concentration::diffuseWorker(int start, long len)
 	int dir = 0;
 	int repetitions = 1;
 
+	//apparently, each thread needs to seed its RNG, otherwise very weird stuff happens with brownian motion.
+	srand((int)clock());
+
 	//std::default_random_engine gen;
 	//std::normal_distribution<double> distro(0, 1);
 
@@ -207,7 +210,7 @@ void Concentration::diffuseWorker(int start, long len)
 		downRight = (*grid)[((i + gridWidth + 1) + gridLength) % gridLength];
 		down = (*grid)[((i + gridWidth) + gridLength) % gridLength];
 
-		diffTopright = diffusionCoefficient * secWeight * (topRight - own);
+		diffTopright = diffusionCoefficient * secWeight * (topRight - own); // * distro(gen)
 		diffRight = diffusionCoefficient * (right - own);
 		diffDownright = diffusionCoefficient * secWeight * (downRight - own);
 		diffDown = diffusionCoefficient * (down - own);
@@ -233,15 +236,29 @@ void Concentration::diffuseWorker(int start, long len)
 			//fast but bad random:
 			int diff = rand();
 			if (diff < RAND_MAX / 2)
-				diff = -1;
-			else
 				diff = 1;
+			else
+				diff = -1;
 
 			//slow but good random:
 			//int diff = round(distro(gen));
+
 			if ((*newGrid)[i] - diff >= 0)
 			{
-				dir = ((int)(rand()/7)) % 4;
+				//dir = (int)(distro(gen)*100) % 4;
+				/*
+				dir = rand();
+				if (dir < 1.0 / 4.0 * RAND_MAX)
+					dir = 3;
+				if (dir > 1.0 / 4.0 * RAND_MAX)
+					dir = 2;
+				if (dir > 2.0 / 4.0 * RAND_MAX)
+					dir = 1;
+				if (dir > 3.0 / 4.0 * RAND_MAX)
+					dir = 0;
+				*/
+				dir = (int)(rand() / 10) % 4;
+
 				if (dir == 0)
 				{
 					if ((*newGrid)[((i - gridWidth + 1) + gridLength) % gridLength] + diff >= 0)
@@ -287,7 +304,7 @@ void Concentration::diffuseWorker(int start, long len)
 
 void Concentration::tick(int t)
 {
-	diffuseThreaded(4);
+	diffuseThreaded(1);
 }
 
 void Concentration::diffuseThreaded(int num)
