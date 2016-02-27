@@ -1,3 +1,6 @@
+#ifndef SIM
+#define SIM
+
 #include <SDL.h>
 #include <SDL_image.h>
 #include <string>
@@ -29,3 +32,5 @@ public:
 	void close();
 	SDL_Texture * loadTexture(std::string path);
 };
+
+#endif

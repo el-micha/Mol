@@ -72,7 +72,7 @@ void Sim::run()
 				x = x / CELL_WIDTH;
 				y = y / CELL_HEIGHT;
 
-				std::cout << mol.getCell(x,y) << std::endl;
+				//std::cout << mol.getCell(x,y) << std::endl;
 			}
 		}
 		//Simulate and draw here
@@ -122,7 +122,7 @@ void Sim::run()
 		//mol.setCell(255, (GRID_HEIGHT + 1.2)*GRID_WIDTH / 2);
 
 		clock_t e0 = clock();
-		//std::cout << "Tick Time: " << e0 - s0 << std::endl;
+		std::cout << "Tick Time: " << e0 - s0 << std::endl;
 		if (counter%30 == 0)
 			std::cout << mol.total() << std::endl;
 	}

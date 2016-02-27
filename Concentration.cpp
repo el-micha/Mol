@@ -241,8 +241,8 @@ void Concentration::diffuseWorker(int start, long len)
 				diff = -1;
 
 			//slow but good random:
-			if (start > 0)	
-				diff = round(distro(gen));
+			//if (start > 0)	
+			//	diff = round(distro(gen));
 
 			if ((*newGrid)[i] - diff >= 0)
 			{
@@ -305,7 +305,7 @@ void Concentration::diffuseWorker(int start, long len)
 
 void Concentration::tick(int t)
 {
-	diffuseThreaded(4);
+	diffuseThreaded(1);
 }
 
 void Concentration::diffuseThreaded(int num)
