@@ -193,8 +193,8 @@ void Concentration::diffuseWorker(int start, long len)
 	long diffDown;
 
 	int dir = 0;
-	int repetitions = 1;
-
+	int repetitions = 1;	//1 definitely looks best
+	
 	//apparently, each thread needs to seed its RNG, otherwise very weird stuff happens with brownian motion.
 	srand((int)clock());
 
@@ -241,7 +241,8 @@ void Concentration::diffuseWorker(int start, long len)
 				diff = -1;
 
 			//slow but good random:
-			//int diff = round(distro(gen));
+			if (start > 0)	
+				diff = round(distro(gen));
 
 			if ((*newGrid)[i] - diff >= 0)
 			{
@@ -304,7 +305,7 @@ void Concentration::diffuseWorker(int start, long len)
 
 void Concentration::tick(int t)
 {
-	diffuseThreaded(1);
+	diffuseThreaded(4);
 }
 
 void Concentration::diffuseThreaded(int num)
