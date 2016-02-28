@@ -37,3 +37,17 @@ void Solution::randomize(long intensity)
 		substances[i]->randomize(1, 0, intensity);
 	}
 }
+
+long Solution::getCell(int gridNum, long pos)
+{
+	return substances[gridNum]->getCell(pos);
+}
+
+int Solution::getActiveConcentrations()
+{
+	return activeConcentrations;
+}
+int Solution::getMaxConcentrations()
+{
+	return maxConcentrations;
+}

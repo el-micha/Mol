@@ -14,6 +14,10 @@ public:
 	~Solution();
 	void tick(int);
 	void randomize(long intensity);
+	long getCell(int gridNum, long pos);
+	int getActiveConcentrations();
+	int getMaxConcentrations();
+
 };
 
 #endif

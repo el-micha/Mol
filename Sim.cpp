@@ -1,5 +1,6 @@
 #include "Sim.h"
 #include "Concentration.h"
+#include "Solution.h"
 #include <iostream>
 #include <cstdlib>
 #include <time.h>
@@ -33,11 +34,15 @@ Sim::~Sim()
 
 void Sim::run()
 {
-	Concentration mol = Concentration(GRID_WIDTH, GRID_HEIGHT);
-	Concentration mol2 = Concentration(GRID_WIDTH, GRID_HEIGHT);
+	//Concentration mol = Concentration(GRID_WIDTH, GRID_HEIGHT);
+	//Concentration mol2 = Concentration(GRID_WIDTH, GRID_HEIGHT);
+	
+	int numConc = 16;
+	Solution sol = Solution(numConc, GRID_WIDTH, GRID_HEIGHT);
+	sol.randomize(5000);
 
-	long max = 1000000;
-	mol.setCell(40000, GRID_WIDTH*(GRID_HEIGHT+1) / 2);
+	//long max = 1000000;
+	//mol.setCell(40000, GRID_WIDTH*(GRID_HEIGHT+1) / 2);
 	//mol.randomize(100, 1000, 10000);
 
 	if (!initSDL())
@@ -46,6 +51,10 @@ void Sim::run()
 	}
 
 	running = true;
+
+	int highlight1 = 0;
+	int highlight2 = 0;
+	int highlight3 = 0;
 
 	SDL_Event event;
 	int counter = 0;
@@ -74,6 +83,30 @@ void Sim::run()
 
 				//std::cout << mol.getCell(x,y) << std::endl;
 			}
+			if (event.type = SDL_KEYDOWN)
+			{
+				switch (event.key.keysym.sym)
+				{
+				case SDLK_i:
+					highlight1 = (highlight1 + 1) % sol.getMaxConcentrations();
+					std::cout << "i" << std::endl;
+				case SDLK_u:
+					highlight1 = (highlight1 - 1) % sol.getMaxConcentrations();
+					std::cout << "u" << std::endl;
+				case SDLK_k:
+					highlight2 = (highlight2 + 1) % sol.getMaxConcentrations();
+					std::cout << "k" << std::endl;
+				case SDLK_j:
+					highlight2 = (highlight2 - 1) % sol.getMaxConcentrations();
+					std::cout << "j" << std::endl;
+				case SDLK_m:
+					highlight3 = (highlight3 + 1) % sol.getMaxConcentrations();
+					std::cout << "m" << std::endl;
+				case SDLK_n:
+					highlight3 = (highlight3 - 1) % sol.getMaxConcentrations();
+					std::cout << "n" << std::endl;
+				}
+			}
 		}
 		//Simulate and draw here
 		
@@ -91,13 +124,26 @@ void Sim::run()
 			//x zeilennummer
 			int x = ((double)i) / GRID_WIDTH;
 			int y = i % GRID_WIDTH;
+			int r = 0;
+			int g = 0;
+			int b = 0;
+			int concVec[16];
+			//todo
+
+			for (int j = 0; j < 16; j++)
+			{
+				concVec[j] = sol.getCell(j, i);
+			}
+
+			//unsigned long a = mol.getCell(i);
+			//unsigned long b = mol2.getCell(i);
 			
-			unsigned long a = mol.getCell(i);
-			unsigned long b = mol2.getCell(i);
-			
+			r = concVec[highlight1];
+			g = concVec[highlight2];
+			b = concVec[highlight3];
 
 			SDL_Rect rect = { y*CELL_WIDTH, x*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT };
-			SDL_SetRenderDrawColor(renderer, (1 * a) % 256, (1 * a) % 256, (1 * a) % 255, 255);
+			SDL_SetRenderDrawColor(renderer, (r) % 256, (g) % 256, (b) % 255, 255);
 			SDL_RenderFillRect(renderer, &rect);
 		}
 
@@ -111,20 +157,22 @@ void Sim::run()
 		//SDL_Delay(100);
 		clock_t start = clock();
 		//mol.diffuse();
-		mol.tick(counter);
-		mol2.tick(counter);
+		//mol.tick(counter);
+		//mol2.tick(counter);
+		sol.tick(counter);
 		clock_t end = clock();
 		//std::cout << "Diffuse Time: " << end - start << std::endl;
 		
-		mol.randomize(1, 0, 1000);
+		//mol.randomize(1, 0, 1000);
 		//mol2.randomize(1, 0, 255);
 		//mol.setCell(25, (GRID_HEIGHT+0.8)*GRID_WIDTH/2);
 		//mol.setCell(255, (GRID_HEIGHT + 1.2)*GRID_WIDTH / 2);
 
 		clock_t e0 = clock();
 		std::cout << "Tick Time: " << e0 - s0 << std::endl;
-		if (counter%30 == 0)
-			std::cout << mol.total() << std::endl;
+		sol.randomize(10000);
+		//if (counter%30 == 0)
+		//	std::cout << mol.total() << std::endl;
 	}
 
 
