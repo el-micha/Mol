@@ -56,6 +56,8 @@ void Sim::run()
 	int highlight2 = 0;
 	int highlight3 = 0;
 
+	clock_t lastKey = clock();
+
 	SDL_Event event;
 	int counter = 0;
 	while (running)
@@ -83,28 +85,35 @@ void Sim::run()
 
 				//std::cout << mol.getCell(x,y) << std::endl;
 			}
-			if (event.type = SDL_KEYDOWN)
+			if (event.type = SDL_KEYDOWN && (clock() - lastKey) > 300)
 			{
+				lastKey = clock();
 				switch (event.key.keysym.sym)
 				{
 				case SDLK_i:
 					highlight1 = (highlight1 + 1) % sol.getMaxConcentrations();
 					std::cout << "i" << std::endl;
+					break;
 				case SDLK_u:
 					highlight1 = (highlight1 - 1) % sol.getMaxConcentrations();
 					std::cout << "u" << std::endl;
+					break;
 				case SDLK_k:
 					highlight2 = (highlight2 + 1) % sol.getMaxConcentrations();
 					std::cout << "k" << std::endl;
+					break;
 				case SDLK_j:
 					highlight2 = (highlight2 - 1) % sol.getMaxConcentrations();
 					std::cout << "j" << std::endl;
+					break;
 				case SDLK_m:
 					highlight3 = (highlight3 + 1) % sol.getMaxConcentrations();
 					std::cout << "m" << std::endl;
+					break;
 				case SDLK_n:
 					highlight3 = (highlight3 - 1) % sol.getMaxConcentrations();
 					std::cout << "n" << std::endl;
+					break;
 				}
 			}
 		}
@@ -127,7 +136,7 @@ void Sim::run()
 			int r = 0;
 			int g = 0;
 			int b = 0;
-			int concVec[16];
+			long concVec[16];
 			//todo
 
 			for (int j = 0; j < 16; j++)
