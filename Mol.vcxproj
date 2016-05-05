@@ -22,7 +22,7 @@
     <ClInclude Include="Solution.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{7C18BC52-C420-46B8-8E75-61D8A475EF26}</ProjectGuid>
+    <ProjectGuid>{B0529EB4-31F3-44C1-93A6-0B943DBD9A3F}</ProjectGuid>
     <RootNamespace>Mol</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

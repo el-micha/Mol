@@ -1,16 +1,15 @@
 #include "Solution.h"
-#include "Concentration.h"
 
 Solution::Solution(int maxNum, int width, int height)
 {
 	maxConcentrations = maxNum;
+	activeConcentrations = maxNum;
 	substances = new Concentration*[maxNum];
 	
 	for (int i = 0; i < maxNum; i++)
 	{
 		substances[i] = new Concentration(width, height);
 	}
-	activeConcentrations = maxNum;
 }
 
 Solution::~Solution()
@@ -24,10 +23,16 @@ Solution::~Solution()
 
 void Solution::tick(int counter)
 {
+	//todo: parallelize this
 	for (int i = 0; i < activeConcentrations; i++)
 	{
 		substances[i]->tick(counter);
 	}
+}
+
+void Solution::draw(SDL_Renderer* renderer)
+{
+
 }
 
 void Solution::randomize(long intensity)
@@ -40,6 +45,11 @@ void Solution::randomize(long intensity)
 
 long Solution::getCell(int gridNum, long pos)
 {
+	if (gridNum > activeConcentrations)
+	{
+		std::cout << "solution:getCell gridNum > active Concentrations. Looping back" << std::endl;
+		gridNum = gridNum % activeConcentrations;
+	}
 	return substances[gridNum]->getCell(pos);
 }
 

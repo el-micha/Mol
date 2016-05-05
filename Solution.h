@@ -1,6 +1,8 @@
 #ifndef SOLUTION
 #define SOLUTION
 
+#include <iostream>
+#include <SDL.h>
 #include "Concentration.h"
 
 class Solution
@@ -13,6 +15,7 @@ public:
 	Solution(int maxNum, int width, int height);
 	~Solution();
 	void tick(int);
+	void draw(SDL_Renderer *);
 	void randomize(long intensity);
 	long getCell(int gridNum, long pos);
 	int getActiveConcentrations();

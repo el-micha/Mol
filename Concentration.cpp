@@ -18,7 +18,7 @@ Concentration::Concentration(int width, int height)
 	gridHeight = height;
 	gridLength = width*height;
 	diffusionCoefficient = 1.0 / 9.0;
-	secWeight = 1 / sqrt(2);
+	secWeight = 1.0 / sqrt(2);
 	g = new long[gridLength];
 	ng = new long[gridLength];
 	for (long i = 0; i < gridLength; i++)
@@ -195,6 +195,7 @@ void Concentration::diffuseWorker(int start, long len)
 	int dir = 0;
 	int repetitions = 1;	//1 definitely looks best
 	
+	//IMPORTANT:
 	//apparently, each thread needs to seed its RNG, otherwise very weird stuff happens with brownian motion.
 	srand((int)clock());
 

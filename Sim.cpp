@@ -14,8 +14,15 @@ Sim::Sim(int gridWidth, int gridHeight)
 	SCREEN_WIDTH = 1024 + 512;
 	SCREEN_HEIGHT = 512 + 256;
 
+	CELL_WIDTH = (int)((float)SCREEN_WIDTH / GRID_WIDTH);
+	CELL_HEIGHT = (int)((float)SCREEN_HEIGHT / GRID_HEIGHT);
+
 	running = false;
 
+	if (!initSDL())
+	{
+		std::cout << "Could not init Sim." << std::endl;
+	}
 
 }
 
@@ -45,16 +52,13 @@ void Sim::run()
 	//mol.setCell(40000, GRID_WIDTH*(GRID_HEIGHT+1) / 2);
 	//mol.randomize(100, 1000, 10000);
 
-	if (!initSDL())
-	{
-		std::cout << "Could not init Sim." << std::endl;
-	}
+	
 
 	running = true;
 
 	int highlight1 = 0;
-	int highlight2 = 0;
-	int highlight3 = 0;
+	int highlight2 = 1;
+	int highlight3 = 2;
 
 	clock_t lastKey = clock();
 
@@ -91,28 +95,28 @@ void Sim::run()
 				switch (event.key.keysym.sym)
 				{
 				case SDLK_i:
-					highlight1 = (highlight1 + 1) % sol.getMaxConcentrations();
-					std::cout << "i" << std::endl;
+					highlight1 = (highlight1 + 1 + sol.getMaxConcentrations()) % sol.getMaxConcentrations();
+					std::cout << "i: " << highlight1 << std::endl;
 					break;
 				case SDLK_u:
-					highlight1 = (highlight1 - 1) % sol.getMaxConcentrations();
-					std::cout << "u" << std::endl;
+					highlight1 = (highlight1 - 1 + sol.getMaxConcentrations()) % sol.getMaxConcentrations();
+					std::cout << "u: " << highlight1 << std::endl;
 					break;
 				case SDLK_k:
-					highlight2 = (highlight2 + 1) % sol.getMaxConcentrations();
-					std::cout << "k" << std::endl;
+					highlight2 = (highlight2 + 1 + sol.getMaxConcentrations()) % sol.getMaxConcentrations();
+					std::cout << "k: " << highlight2 << std::endl;
 					break;
 				case SDLK_j:
-					highlight2 = (highlight2 - 1) % sol.getMaxConcentrations();
-					std::cout << "j" << std::endl;
+					highlight2 = (highlight2 - 1 + sol.getMaxConcentrations()) % sol.getMaxConcentrations();
+					std::cout << "j: " << highlight2 << std::endl;
 					break;
 				case SDLK_m:
-					highlight3 = (highlight3 + 1) % sol.getMaxConcentrations();
-					std::cout << "m" << std::endl;
+					highlight3 = (highlight3 + 1 + sol.getMaxConcentrations()) % sol.getMaxConcentrations();
+					std::cout << "m: " << highlight3 << std::endl;
 					break;
 				case SDLK_n:
-					highlight3 = (highlight3 - 1) % sol.getMaxConcentrations();
-					std::cout << "n" << std::endl;
+					highlight3 = (highlight3 - 1 + sol.getMaxConcentrations()) % sol.getMaxConcentrations();
+					std::cout << "n: " << highlight3 << std::endl;
 					break;
 				}
 			}
@@ -123,8 +127,9 @@ void Sim::run()
 		SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 		SDL_RenderClear(renderer);
 
-		CELL_WIDTH = (int)((float)SCREEN_WIDTH / GRID_WIDTH);
-		CELL_HEIGHT = (int)((float)SCREEN_HEIGHT / GRID_HEIGHT);
+		sol.draw(renderer);
+
+		
 
 		clock_t s1 = clock();
 
