@@ -234,6 +234,9 @@ void Concentration::diffuseWorker(int start, long len)
 		
 		for (int r = 0; r < repetitions; r++)
 		{
+			//if (rand() % 10 > 0)
+			//	continue;
+			
 			//fast but bad random:
 			int diff = rand();
 			if (diff < RAND_MAX / 2)
@@ -306,7 +309,7 @@ void Concentration::diffuseWorker(int start, long len)
 
 void Concentration::tick(int t)
 {
-	diffuseThreaded(1);
+	diffuseThreaded(3);
 }
 
 void Concentration::diffuseThreaded(int num)

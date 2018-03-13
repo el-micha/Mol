@@ -2,6 +2,7 @@
 #include "Concentration.h"
 #include "Solution.h"
 #include <iostream>
+#include <algorithm>
 #include <cstdlib>
 #include <time.h>
 
@@ -44,9 +45,10 @@ void Sim::run()
 	//Concentration mol = Concentration(GRID_WIDTH, GRID_HEIGHT);
 	//Concentration mol2 = Concentration(GRID_WIDTH, GRID_HEIGHT);
 	
-	int numConc = 16;
+	int numConc = 3;
 	Solution sol = Solution(numConc, GRID_WIDTH, GRID_HEIGHT);
-	sol.randomize(5000);
+	//sol.randomize(32768);
+	sol.randomize(32768);
 
 	//long max = 1000000;
 	//mol.setCell(40000, GRID_WIDTH*(GRID_HEIGHT+1) / 2);
@@ -57,8 +59,8 @@ void Sim::run()
 	running = true;
 
 	int highlight1 = 0;
-	int highlight2 = 1;
-	int highlight3 = 2;
+	int highlight2 = 0;
+	int highlight3 = 0;
 
 	clock_t lastKey = clock();
 
@@ -141,10 +143,10 @@ void Sim::run()
 			int r = 0;
 			int g = 0;
 			int b = 0;
-			long concVec[16];
+			long concVec[3];
 			//todo
-
-			for (int j = 0; j < 16; j++)
+			// this 3 is lenght of concvec!
+			for (int j = 0; j < 3; j++)
 			{
 				concVec[j] = sol.getCell(j, i);
 			}
@@ -156,8 +158,13 @@ void Sim::run()
 			g = concVec[highlight2];
 			b = concVec[highlight3];
 
+			int scale = 64;
+			r = std::min(255, (int)((std::log(1+r)) * scale));
+			g = std::min(255, (int)((std::log(1+g)) * scale));
+			b = std::min(255, (int)((std::log(1+b)) * scale));
+
 			SDL_Rect rect = { y*CELL_WIDTH, x*CELL_HEIGHT, CELL_WIDTH, CELL_HEIGHT };
-			SDL_SetRenderDrawColor(renderer, (r) % 256, (g) % 256, (b) % 255, 255);
+			SDL_SetRenderDrawColor(renderer, (r) % 256, (g) % 256, (b) % 256, 255);
 			SDL_RenderFillRect(renderer, &rect);
 		}
 
@@ -184,7 +191,10 @@ void Sim::run()
 
 		clock_t e0 = clock();
 		std::cout << "Tick Time: " << e0 - s0 << std::endl;
-		sol.randomize(10000);
+		
+		//if (counter < 100)	
+			//sol.randomize(10000);
+		std::cout << "Total: " << sol.total(0) << std::endl;
 		//if (counter%30 == 0)
 		//	std::cout << mol.total() << std::endl;
 	}

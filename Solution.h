@@ -20,7 +20,7 @@ public:
 	long getCell(int gridNum, long pos);
 	int getActiveConcentrations();
 	int getMaxConcentrations();
-
+	long total(int);
 };
 
 #endif

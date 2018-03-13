@@ -21,6 +21,11 @@ Solution::~Solution()
 	delete substances;
 }
 
+long Solution::total(int substance)
+{
+	return substances[substance] -> total();
+}
+
 void Solution::tick(int counter)
 {
 	//todo: parallelize this
@@ -39,7 +44,7 @@ void Solution::randomize(long intensity)
 {
 	for (int i = 0; i < activeConcentrations; i++)
 	{
-		substances[i]->randomize(1, 0, intensity);
+		substances[i]->randomize(1, intensity-1, intensity);
 	}
 }
 
