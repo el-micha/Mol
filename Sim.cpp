@@ -48,7 +48,7 @@ void Sim::run()
 	int numConc = 3;
 	Solution sol = Solution(numConc, GRID_WIDTH, GRID_HEIGHT);
 	//sol.randomize(32768);
-	sol.randomize(32768);
+	//sol.randomize(3278);
 
 	//long max = 1000000;
 	//mol.setCell(40000, GRID_WIDTH*(GRID_HEIGHT+1) / 2);

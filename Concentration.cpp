@@ -23,8 +23,8 @@ Concentration::Concentration(int width, int height)
 	ng = new long[gridLength];
 	for (long i = 0; i < gridLength; i++)
 	{
-		g[i] = 0;
-		ng[i] = 0;
+		g[i] = 30;
+		ng[i] = 30;
 	}
 	grid = &g;
 	newGrid = &ng;
@@ -310,6 +310,18 @@ void Concentration::diffuseWorker(int start, long len)
 void Concentration::tick(int t)
 {
 	diffuseThreaded(3);
+
+	
+	int source = 128 * 20 + 32;
+	int drain = 128 * 60 - 32;
+	//int drain = source + 8;
+	long maxDiff = 10;
+	long sourceCon = this->getCell(source);
+	long drainCon = this->getCell(drain);
+	long diff = fmin(maxDiff, drainCon);
+	this->setCell(sourceCon + diff, source);
+	this->setCell(drainCon - diff, drain);
+	
 }
 
 void Concentration::diffuseThreaded(int num)
